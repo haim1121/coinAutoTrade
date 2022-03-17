@@ -1,3 +1,5 @@
+# made by Haim
+
 import information as infor
 
 import pyupbit
