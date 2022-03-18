@@ -5,6 +5,9 @@ import requests
 import time
 import datetime
 
+
+
+
 def post_message(text, token = infor.token, channel = infor.channel):
     """Slack message"""
     response = requests.post("https://slack.com/api/chat.postMessage",
@@ -29,8 +32,13 @@ def get_current_price(ticker):
     """current price"""
     return pyupbit.get_orderbook(ticker=ticker)["orderbook_units"][0]["ask_price"]
 
-
-
+def re_buy():
+    if origin_buy_price!=buy_price and is_btc or origin_target_price!= target_price:
+        return True
+    else:
+        return False
+        
+    
 # -- Login
 upbit = pyupbit.Upbit(infor.access, infor.secret)
 print("Autotrade start")
@@ -45,6 +53,7 @@ minTrade = 5000
 fee = 0.9995
 origin_buy_price = get_balance(coin_ticker)
 percent = infor.percent
+origin_target_price = origin_buy_price*percent
 error_cnt = 0
 
 target_price = origin_buy_price*percent
@@ -54,22 +63,27 @@ post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(origin_
 
 while True:
     try:
+        percent = infor.percent
+        
         # Buy & Target Price
         buy_price = get_balance(coin_ticker)
         target_price = buy_price*percent
         is_btc = get_balance(coin_ticker,coin_price=False)>infor.limit_btc
 
         # Re Buy
-        if origin_buy_price!=buy_price and is_btc:
+        if re_buy()==True:
             origin_buy_price = buy_price
+            target_price = buy_price*percent
+            origin_target_price = target_price
             post_message("< Buy Checked >")
             post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(buy_price, target_price, target_price-buy_price))
-        
+            
         # Current Price
         current_price = get_current_price(coin)*get_balance(coin_ticker,coin_price=False)
         
+
         # Sell : target_price < current_price
-        if target_price < current_price and is_btc:
+        if target_price < current_price and is_btc and not re_buy():
             post_message("Selling Time!!")
             btc = get_balance(coin_ticker,coin_price=False)
             
@@ -79,8 +93,8 @@ while True:
                 post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(buy_price, target_price, target_price-buy_price))
 
                 current_price = get_current_price(coin)*get_balance(coin_ticker,coin_price=False)
-                post_message("Profitable : %.2f %"%(current_price/buy_price))
-                post_message("KRW : %.1f"%get_balance("KRW",coin_price=False))
+                post_message("Profitable : %.2f percent"%(current_price/buy_price))
+                post_message("KRW : %.1f"%(get_balance("KRW",coin_price=False)))
 
         time.sleep(1)
 
