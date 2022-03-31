@@ -35,8 +35,11 @@ def get_current_price(ticker):
     return pyupbit.get_orderbook(ticker=ticker)["orderbook_units"][0]["ask_price"]
 
 def re_buy():
-    if origin_buy_price!=buy_price and is_btc or origin_target_price!= target_price:
-        return True
+    if is_btc:
+        if origin_buy_price!=buy_price or origin_target_price!=target_price:
+            return True
+        else:
+            return False
     else:
         return False
         
@@ -60,7 +63,7 @@ error_cnt = 0
 
 target_price = origin_buy_price*percent
 # -- Start message
-post_message("< %s Start > %s autotrade started"%(str(datetime.datetime.now())[11:16],coin))
+post_message("< %s Start > %s autotrade started : percent = %.2f"%(str(datetime.datetime.now())[11:16],coin,(percent-1)*100))
 post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(origin_buy_price, target_price, target_price-origin_buy_price))
 
 while True:
@@ -93,9 +96,9 @@ while True:
                 sell_result = upbit.sell_market_order(coin, btc*fee)
                 post_message("< Sell > %s : "%coin +str(sell_result))
                 post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(buy_price, target_price, target_price-buy_price))
-
+                post_message("Current_price = %.1f"%current_price)
+                post_message("Profitable : %.3f percent"%(current_price/buy_price))
                 current_price = get_current_price(coin)*get_balance(coin_ticker,coin_price=False)
-                post_message("Profitable : %.2f percent"%(current_price/buy_price))
                 post_message("KRW : %.1f"%(get_balance("KRW",coin_price=False)))
 
         time.sleep(1)
