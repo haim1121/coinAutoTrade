@@ -60,7 +60,7 @@ origin_buy_price = get_balance(coin_ticker)
 percent = infor.percent
 buy_percent = infor.buy_percent
 limit_left = infor.limit_left
-buy_krw = infor.limit_left
+buy_krw = infor.buy_krw
 origin_target_price = origin_buy_price*percent
 error_cnt = 0
 
@@ -82,6 +82,7 @@ while True:
         # Re Buy
         if re_buy()==True:
             buy_price = get_balance(coin_ticker)
+            buy_target = buy_price*buy_percent
             target_price = buy_price*percent
             origin_buy_price = buy_price
             origin_target_price = target_price
@@ -93,6 +94,7 @@ while True:
 
         # Current Price
         buy_price = get_balance(coin_ticker)
+        buy_target = buy_price*buy_percent
         target_price = buy_price*percent
         origin_buy_price = buy_price
         origin_target_price = target_price
