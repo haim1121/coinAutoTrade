@@ -116,9 +116,10 @@ while True:
         # Current Price
         buy_price,buy_target,target_price,origin_buy_price,origin_target_price,current_price = price_setting()
         krw = get_balance("KRW",coin_price=False)
+        current_coin_price = get_current_price(coin)
 
         # Sell : target_price < current_price
-        if target_price*percent <= current_price and is_btc:
+        if target_price*percent < current_coin_price and is_btc:
             post_message("Selling Time!! _ third")
             btc = get_balance(coin_ticker,coin_price=False)
             
@@ -142,8 +143,10 @@ while True:
             current_coin_price = get_current_price(coin)
             current_price = current_coin_price*current_coin
             
+            print(target_price, current_coin_price)
+
             # Buy : buy_target > current_price
-            if target_price > current_price and non_buy:
+            if target_price > current_coin_price and non_buy:
                 krw = get_balance("KRW",coin_price=False)
                 if krw > 100000 and current_coin<(sub_can_buy/current_coin_price):
                     buy_result = upbit.buy_market_order(coin, sub_can_buy*fee)
