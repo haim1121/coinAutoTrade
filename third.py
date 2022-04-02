@@ -80,8 +80,6 @@ fee = 0.9995
 origin_buy_price = get_balance(coin_ticker)
 percent = infor.sub_tarK
 buy_percent = infor.buy_percent
-limit_left = infor.limit_left
-buy_krw = infor.limit_left
 sub_can_buy = infor.sub_can_buy
 origin_target_price = origin_buy_price*percent
 error_cnt = 0
@@ -89,11 +87,14 @@ sellSeconds = infor.sellSeconds
 k=infor.sub_k
 limit_btc=infor.sub_limit_btc
 
-target_price = origin_buy_price*percent
+target_price = get_target_price(coin, k)
 buy_target = origin_buy_price*buy_percent
+
+non_buy = True
+
 # -- Start message
-post_message("< %s Start > %s autotrade started : percent = %.2f"%(str(datetime.datetime.now())[11:16],coin,(percent-1)*100))
-post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(origin_buy_price, target_price, target_price-origin_buy_price))
+post_message("< %s Start _ third > %s autotrade started : percent = %.2f"%(str(datetime.datetime.now())[11:16],coin,(percent-1)*100))
+post_message("Buy Price = %.1f, Target Price = %.1f, will buy price = %.1f"%(origin_buy_price, target_price, target_price*percent))
 
 while True:
     try:
@@ -107,7 +108,7 @@ while True:
         # Re Buy
         if re_buy()==True:
             buy_price,buy_target,target_price,origin_buy_price,origin_target_price,current_price = price_setting()
-            post_message("< Buy Checked >")
+            post_message("< Buy Checked _ third >")
             post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(buy_price, target_price, target_price-buy_price))
 
         time.sleep(1)
@@ -117,8 +118,8 @@ while True:
         krw = get_balance("KRW",coin_price=False)
 
         # Sell : target_price < current_price
-        if target_price < current_price and is_btc:
-            post_message("Selling Time!!")
+        if target_price*percent <= current_price and is_btc:
+            post_message("Selling Time!! _ third")
             btc = get_balance(coin_ticker,coin_price=False)
             
             if btc > infor.limit_btc:
@@ -140,25 +141,27 @@ while True:
             current_coin = get_balance(coin_ticker,coin_price=False)
             current_coin_price = get_current_price(coin)
             current_price = current_coin_price*current_coin
-
+            
             # Buy : buy_target > current_price
-            if target_price < current_price:
+            if target_price > current_price and non_buy:
                 krw = get_balance("KRW",coin_price=False)
-                if krw > minTrade and current_coin<(sub_can_buy/current_coin_price):
+                if krw > 100000 and current_coin<(sub_can_buy/current_coin_price):
                     buy_result = upbit.buy_market_order(coin, sub_can_buy*fee)
-                    post_message("Buying time!!")
+                    post_message("Buying time!! _ third")
+                    non_buy = False
         else:
             btc = get_balance(coin_ticker,coin_price=False)
+            non_buy = True
             if btc > limit_btc:
                 sell_result = upbit.sell_market_order(coin, btc*fee)
-                post_message("TimeOver Selling --")
+                post_message("TimeOver Selling -- _ third")
                 post_message("Profitable : %.3f percent"%(current_price/buy_price))
                 post_message("KRW : %.1f"%(get_balance("KRW",coin_price=False)))
 
         time.sleep(1)
 
     except Exception as e:
-        post_message("< Error > "+str(e))
+        post_message("< Error _ third > "+str(e))
         error_cnt += 1
         time.sleep(1)
 
