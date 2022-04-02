@@ -125,11 +125,7 @@ while True:
             
             if btc > infor.limit_btc:
                 sell_result = upbit.sell_market_order(coin, btc*fee)
-                post_message("< Sell > %s : "%coin +str(sell_result))
-                post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(buy_price, target_price, target_price-buy_price))
-                post_message("Current_price = %.1f"%current_price)
-                post_message("Profitable : %.3f percent"%(current_price/buy_price))
-                # current_price = get_current_price(coin)*get_balance(coin_ticker,coin_price=False)
+                post_message("< Sell > %s : "%coin+"Buy Price = %.1f, Current Price = %.1f, Profitable = %.2f"%(buy_price, current_price, current_coin_price/target_price))
                 post_message("KRW : %.1f"%(get_balance("KRW",coin_price=False)))
 
         now = datetime.datetime.now()
@@ -150,8 +146,9 @@ while True:
                 krw = get_balance("KRW",coin_price=False)
                 if krw > 100000 and current_coin<(sub_can_buy/current_coin_price):
                     buy_result = upbit.buy_market_order(coin, sub_can_buy*fee)
-                    post_message("Buying time!! _ third")
                     non_buy = False
+                    post_message("Buying time!! _ third")
+                    
         else:
             btc = get_balance(coin_ticker,coin_price=False)
             non_buy = True
