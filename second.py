@@ -59,15 +59,15 @@ fee = 0.9995
 origin_buy_price = get_balance(coin_ticker)
 percent = infor.percent
 buy_percent = infor.buy_percent
-limit_left = infor.limit_left
 buy_krw = infor.buy_krw
 origin_target_price = origin_buy_price*percent
 error_cnt = 0
+can_buy = infor.can_buy
 
 target_price = origin_buy_price*percent
 buy_target = origin_buy_price*buy_percent
 # -- Start message
-post_message("< %s Start > %s autotrade started : percent = %.2f"%(str(datetime.datetime.now())[11:16],coin,(percent-1)*100))
+post_message("< %s Start _ second > %s autotrade started : percent = %.2f"%(str(datetime.datetime.now())[11:16],coin,(percent-1)*100))
 post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(origin_buy_price, target_price, target_price-origin_buy_price))
 
 while True:
@@ -87,7 +87,7 @@ while True:
             origin_buy_price = buy_price
             origin_target_price = target_price
             current_price = get_current_price(coin)*get_balance(coin_ticker,coin_price=False)
-            post_message("< Buy Checked >")
+            post_message("< Buy Checked _ second >")
             post_message("Buy Price = %.1f, Target Price = %.1f, Profitable = %.1f"%(buy_price, target_price, target_price-buy_price))
 
         time.sleep(1)
@@ -101,10 +101,14 @@ while True:
         current_price = get_current_price(coin)*get_balance(coin_ticker,coin_price=False)
 
         krw = get_balance("KRW",coin_price=False)
+        
+        
+        current_coin = get_balance(coin_ticker,coin_price=False)
+        current_coin_price = get_current_price(coin)
 
         # Sell : target_price < current_price
-        if target_price < current_price and is_btc:
-            post_message("Selling Time!!")
+        if target_price < current_price and current_price < target_price*1.4  and is_btc:
+            post_message("Selling Time!! _ second")
             btc = get_balance(coin_ticker,coin_price=False)
             
             if btc > infor.limit_btc:
@@ -117,8 +121,8 @@ while True:
                 post_message("KRW : %.1f"%(get_balance("KRW",coin_price=False)))
 
         # Buy : buy_target > current_price
-        elif buy_target>current_price and krw>limit_left:
-            post_message("Buying Time!!")
+        elif buy_target>current_price and current_coin<(can_buy/current_coin_price) and krw>minTrade:
+            post_message("Buying Time!! _ second ")
             buy_result = upbit.buy_market_order(coin, buy_krw*fee)
             # post_message("BTC buy : " +str(buy_result))
 
